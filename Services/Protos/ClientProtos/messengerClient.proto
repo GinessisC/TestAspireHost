@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+option csharp_namespace = "DataProvider"; //TODO: if does not work, change to Storefront
+
+package messengerDB;
+
+service MessengerRepository {
+  rpc WriteMessageToDb(WriteMessageDbRequest) returns (WriteMessageResultModel);
+  rpc GetUserMessagesFromDb(GetMessagesDbRequest) returns (stream MessageFromDb);
+  rpc EditMessageInDb(EditMessageDbRequestModel) returns (EditMessageDbResult);
+  rpc DeleteMessageFromDb(DeleteMessageDbRequest) returns (DeleteMessageDbResultModel);
+}
+
+message WriteMessageDbRequest {
+  int32 requestUserId = 1;
+  int32 responseUserId = 2;
+  string textMessage = 3;
+  string messageId = 4;
+}
+message WriteMessageResultModel {
+  bool isSuccessful = 1;
+  string errorDescription = 2;
+}
+
+message GetMessagesDbRequest {
+  int32 requestUserId = 1;
+}
+message MessageFromDb {
+  string message = 1;
+  string messageId = 2;
+  int32 userId = 3;
+}
+
+message EditMessageDbRequestModel {
+  string messageId = 1;
+  string newMessage = 2;
+}
+message EditMessageDbResult {
+  bool isSuccessful = 1;
+  string errorDescription = 2;
+}
+
+message DeleteMessageDbRequest {
+  string messageId = 1;
+}
+message DeleteMessageDbResultModel {
+  bool isSuccessful = 1;
+  string errorMessage = 2;
+}
