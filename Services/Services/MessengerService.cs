@@ -38,12 +38,13 @@ public class MessengerService : Messenger.MessengerBase
 		IServerStreamWriter<GetMessageResponse> responseStream,
 		ServerCallContext context)
 	{
-		IAsyncEnumerable<MessageFromDb> messages =
-			await _messengerClientService.GetUserMessagesByUserIdAsync(request.RequestUserId);
+		var messages =
+			_messengerClientService.GetUserMessagesByUserIdAsync(request.RequestUserId, context.CancellationToken);
 
+		
 		await foreach (MessageFromDb dbMessage in messages)
 		{
-			//TODO: get mapping work out
+			//TODO: get mapping work out of here
 			GetMessageResponse response = new GetMessageResponse
 			{
 				Message = dbMessage.Message,
@@ -51,7 +52,7 @@ public class MessengerService : Messenger.MessengerBase
 				ReceiverId = dbMessage.UserId
 			};
 
-			await responseStream.WriteAsync(response);
+			await responseStream.WriteAsync(response, context.CancellationToken);
 		}
 	}
 }

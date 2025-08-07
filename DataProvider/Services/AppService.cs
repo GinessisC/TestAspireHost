@@ -1,6 +1,7 @@
 using DataProvider.Abstractions.Repositories;
 using DataProvider.Entities;
 using Grpc.Core;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataProvider.Services;
 
@@ -8,9 +9,8 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 {
 	private readonly IRepository<UserEntity> _userRepository;
 	private readonly IRepository<MessageEntity> _messageRepository;
-
 	private readonly ILogger<AppService> _logger;
-
+	private const int TakeCount = 10;
 	public AppService(
 		ILogger<AppService> logger,
 		IRepository<UserEntity> userRepository,
@@ -25,7 +25,7 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 		WriteMessageDbRequest request,
 		ServerCallContext context)
 	{
-		bool isRequestValid = await BothUsersExistAsync(request);
+		bool isRequestValid = await BothUsersExistAsync(request, context.CancellationToken);
 
 		WriteMessageResultModel response = new WriteMessageResultModel
 		{
@@ -43,7 +43,7 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 			SenderId = request.RequestUserId,
 			ReceiverId = request.ResponseUserId,
 			MessageText = request.TextMessage
-		});
+		}, context.CancellationToken);
 
 		return response;
 	}
@@ -52,29 +52,30 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 		IServerStreamWriter<MessageFromDb> responseStream,
 		ServerCallContext context)
 	{
-		IQueryable<MessageEntity> messagesForRequestedUser = _messageRepository
-			.Where(m => m.ReceiverId == request.RequestUserId);
-
-		_logger.LogInformation($"{messagesForRequestedUser.Count()} messages found");
-
-		foreach (MessageEntity message in messagesForRequestedUser)
-		{
-			await responseStream.WriteAsync(new MessageFromDb
+		IQueryable<MessageFromDb> messagesForRequestedUser = _messageRepository
+			.Where(m => m.ReceiverId == request.RequestUserId)
+			.Select(m => new MessageFromDb()
 			{
-				Message = message.MessageText,
-				MessageId = message.MessageId,
-				UserId = message.SenderId
-			});
+				MessageId = m.MessageId,
+				Message = m.MessageText,
+				UserId = m.SenderId
+			}).OrderBy(e => e.MessageId)
+			.Take(TakeCount)
+			.Reverse();
+		
+		await foreach (MessageFromDb message in messagesForRequestedUser.AsAsyncEnumerable())
+		{
+			await responseStream.WriteAsync(message);
 		}
 	}
 
-	private async Task<bool> BothUsersExistAsync(WriteMessageDbRequest request)
+	private async Task<bool> BothUsersExistAsync(WriteMessageDbRequest request, CancellationToken ct)
 	{
 		bool requestUserExistsInDb =
-			await _userRepository.FirstOrDefaultAsync(u => u.UserId == request.RequestUserId) is not null;
+			await _userRepository.FirstOrDefaultAsync(u => u.UserId == request.RequestUserId, ct) is not null;
 
 		bool responseUserExistsInDb =
-			await _userRepository.FirstOrDefaultAsync(u => u.UserId == request.ResponseUserId) is not null;
+			await _userRepository.FirstOrDefaultAsync(u => u.UserId == request.ResponseUserId, ct) is not null;
 
 		bool bothUsersWereFound = requestUserExistsInDb && responseUserExistsInDb;
 

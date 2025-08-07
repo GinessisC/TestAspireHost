@@ -20,10 +20,10 @@ public class Repository<TEntity> : IRepository<TEntity>
 		_dbSet = _dbContext.Set<TEntity>();
 	}
 
-	public async Task AddAsync(TEntity entity)
+	public async Task AddAsync(TEntity entity, CancellationToken ct)
 	{
 		_dbContext.Add(entity);
-		await _dbContext.SaveChangesAsync();
+		await _dbContext.SaveChangesAsync(ct);
 	}
 
 	//Is it not dangerous to use such non-asynchronous method?
@@ -32,11 +32,11 @@ public class Repository<TEntity> : IRepository<TEntity>
 		return _dbSet.Where(predicate);
 	}
 
-	public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate)
+	public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct)
 	{
 		ArgumentNullException.ThrowIfNull(predicate);
-		TEntity? entity = await _dbSet.FirstOrDefaultAsync(predicate);
-
+		TEntity? entity = await _dbSet.FirstOrDefaultAsync(predicate, ct);
+		
 		if (entity is null)
 		{
 			_logger.LogTrace("No requested entity found");

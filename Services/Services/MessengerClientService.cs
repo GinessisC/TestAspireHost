@@ -32,18 +32,22 @@ public class MessengerClientService
 		return response;
 	}
 
-	public async Task<IAsyncEnumerable<MessageFromDb>> GetUserMessagesByUserIdAsync(int userId)
+	public async IAsyncEnumerable<MessageFromDb> GetUserMessagesByUserIdAsync(int userId, CancellationToken ct)
 	{
-		await Task.Delay(100); //TODO: remove it in prod
 
 		AsyncServerStreamingCall<MessageFromDb>? response = _repositoryClient.GetUserMessagesFromDb(
 			new GetMessagesDbRequest
 			{
 				RequestUserId = userId
 			});
+		
+		//TODO: is it the best way to read ALL from stream?
+		//IAsyncEnumerable<MessageFromDb> messagesFromDb = response.ResponseStream.ReadAllAsync(ct);
 
-		IAsyncEnumerable<MessageFromDb> messagesFromDb = response.ResponseStream.ReadAllAsync();
-
-		return messagesFromDb;
+		while (await response.ResponseStream.MoveNext(ct))
+		{
+			var currentMessage = response.ResponseStream.Current;
+			yield return currentMessage;
+		}
 	}
 }

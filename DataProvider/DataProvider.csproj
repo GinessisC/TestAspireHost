@@ -10,6 +10,8 @@
         <ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj"/>
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="9.4.0" />
+        <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.4.0" />
         <PackageReference Include="Grpc.AspNetCore" Version="2.71.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

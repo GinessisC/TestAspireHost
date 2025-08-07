@@ -18,7 +18,6 @@ builder.Services
 	});
 
 builder.Services.AddLogging();
-builder.Services.AddSingleton<CancellationTokenSource>();
 builder.AddServiceDefaults();
 WebApplication app = builder.Build();
 
@@ -37,16 +36,14 @@ static async Task<IResult> WriteMessage(
 
 	if (response == null || response.IsSuccessful is false)
 	{
-		return Results.NotFound();
+		return TypedResults.NotFound();
 	}
-
-	return Results.Ok();
+	return TypedResults.Ok();
 }
 
 static async Task<IResult> GetUserMessages(
 	int id,
-	[FromServices] CancellationTokenSource src,
-	[FromServices] ILogger<Program> logger,
+	CancellationToken ct,
 	[FromServices] Messenger.MessengerClient client)
 {
 	List<GetUserMessageRestResponse> responses = new();
@@ -55,19 +52,13 @@ static async Task<IResult> GetUserMessages(
 	{
 		RequestUserId = id
 	});
-
-	logger.LogInformation("Start of stream");
-	src.Token.ThrowIfCancellationRequested();
-
-	while (await streamResponse.ResponseStream.MoveNext(src.Token))
+	
+	while (await streamResponse.ResponseStream.MoveNext(ct))
 	{
-		logger.LogInformation("entered the stream");
 		GetMessageResponse? currentMessage = streamResponse.ResponseStream.Current;
 		GetUserMessageRestResponse readyResponse = currentMessage.MapToRestResponse();
-		logger.LogInformation($"message: {readyResponse.TextMessage}");
 
 		responses.Add(readyResponse);
 	}
-
-	return Results.Ok(responses);
+	return TypedResults.Ok(responses);
 }

@@ -4,7 +4,7 @@ namespace DataProvider.Abstractions.Repositories;
 
 public interface IRepository<TEntity> where TEntity : class
 {
-	Task AddAsync(TEntity entity);
+	Task AddAsync(TEntity entity, CancellationToken ct);
 	IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> predicate);
-	Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
+	Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken ct);
 }

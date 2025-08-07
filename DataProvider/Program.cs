@@ -8,12 +8,8 @@ using ServiceDefaults;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<AppDbContext>(optionsBuilder =>
-{
-	//TODO what is builder.Configuration.GetConnectionString - read about it
-	optionsBuilder.UseNpgsql(builder.Configuration["DbConnectionString"]);
-});
 
+builder.AddNpgsqlDbContext<AppDbContext>("DbConnectionString"); //dont remove ConnectionStrings section in appsettings.json
 builder.Services.AddLogging();
 
 builder.Services.AddScoped<IRepository<MessageEntity>, Repository<MessageEntity>>();
