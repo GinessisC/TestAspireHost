@@ -1,6 +1,6 @@
 namespace Contracts.Responses;
 
 public sealed record GetUserMessageRestResponse(
-	string MessageId,
+	int MessageId,
 	string TextMessage,
 	int ReceiverId);

@@ -15,7 +15,6 @@ message WriteMessageDbRequest {
   int32 requestUserId = 1;
   int32 responseUserId = 2;
   string textMessage = 3;
-  string messageId = 4;
 }
 message WriteMessageResultModel {
   bool isSuccessful = 1;
@@ -27,12 +26,12 @@ message GetMessagesDbRequest {
 }
 message MessageFromDb {
   string message = 1;
-  string messageId = 2;
+  int32 messageId = 2;
   int32 userId = 3;
 }
 
 message EditMessageDbRequestModel {
-  string messageId = 1;
+  int32 messageId = 1;
   string newMessage = 2;
 }
 message EditMessageDbResult {
@@ -41,7 +40,7 @@ message EditMessageDbResult {
 }
 
 message DeleteMessageDbRequest {
-  string messageId = 1;
+  int32 messageId = 1;
 }
 message DeleteMessageDbResultModel {
   bool isSuccessful = 1;

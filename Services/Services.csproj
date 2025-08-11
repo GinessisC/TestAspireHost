@@ -21,10 +21,9 @@
         </PackageReference>
     </ItemGroup>
 
+    
     <ItemGroup>
-        <Protobuf Include="Protos\ServerProtos\messengerServer.proto" GrpcServices="Server"/>
-        <Protobuf Include="Protos\ClientProtos\messengerClient.proto" GrpcServices="Client"/>
-
+        <Protobuf Include="..\messengerDataProvider.proto" GrpcServices="Client"/>
+        <Protobuf Include="..\messengerStorefront.proto" GrpcServices="Server"/>
     </ItemGroup>
-
 </Project>

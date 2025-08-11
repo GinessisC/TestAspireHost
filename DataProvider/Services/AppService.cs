@@ -7,10 +7,13 @@ namespace DataProvider.Services;
 
 public class AppService : MessengerRepository.MessengerRepositoryBase
 {
+	
 	private readonly IRepository<UserEntity> _userRepository;
 	private readonly IRepository<MessageEntity> _messageRepository;
 	private readonly ILogger<AppService> _logger;
-	private const int TakeCount = 10;
+	private const int PageSize = 10;
+	private const int SkipSize = 5;
+	
 	public AppService(
 		ILogger<AppService> logger,
 		IRepository<UserEntity> userRepository,
@@ -20,13 +23,13 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 		_userRepository = userRepository;
 		_messageRepository = messageRepository;
 	}
-
+	
 	public override async Task<WriteMessageResultModel> WriteMessageToDb(
 		WriteMessageDbRequest request,
 		ServerCallContext context)
 	{
 		bool isRequestValid = await BothUsersExistAsync(request, context.CancellationToken);
-
+		
 		WriteMessageResultModel response = new WriteMessageResultModel
 		{
 			IsSuccessful = isRequestValid
@@ -39,12 +42,11 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 
 		await _messageRepository.AddAsync(new MessageEntity
 		{
-			MessageId = request.MessageId,
 			SenderId = request.RequestUserId,
 			ReceiverId = request.ResponseUserId,
 			MessageText = request.TextMessage
 		}, context.CancellationToken);
-
+		
 		return response;
 	}
 
@@ -52,16 +54,19 @@ public class AppService : MessengerRepository.MessengerRepositoryBase
 		IServerStreamWriter<MessageFromDb> responseStream,
 		ServerCallContext context)
 	{
+		
 		IQueryable<MessageFromDb> messagesForRequestedUser = _messageRepository
 			.Where(m => m.ReceiverId == request.RequestUserId)
-			.Select(m => new MessageFromDb()
+			.OrderBy(e => e.MessageId)
+			.Select(m => new MessageFromDb
 			{
 				MessageId = m.MessageId,
 				Message = m.MessageText,
 				UserId = m.SenderId
-			}).OrderBy(e => e.MessageId)
-			.Take(TakeCount)
-			.Reverse();
+			})
+			//From storefront
+			.Skip(SkipSize)
+			.Take(PageSize);
 		
 		await foreach (MessageFromDb message in messagesForRequestedUser.AsAsyncEnumerable())
 		{

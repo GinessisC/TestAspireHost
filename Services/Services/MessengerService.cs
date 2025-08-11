@@ -22,7 +22,6 @@ public class MessengerService : Messenger.MessengerBase
 			IssuerId = request.RequestUserId,
 			ReceiverId = request.ResponseUserId,
 			TextMessage = request.TextMessage,
-			MessageId = Guid.NewGuid().ToString()
 		};
 
 		WriteMessageResultModel responseFromDb = await _messengerClientService.WriteMessageAsync(message);
@@ -49,9 +48,8 @@ public class MessengerService : Messenger.MessengerBase
 			{
 				Message = dbMessage.Message,
 				MessageId = dbMessage.MessageId,
-				ReceiverId = dbMessage.UserId
+				ReceiverId = dbMessage.UserId,
 			};
-
 			await responseStream.WriteAsync(response, context.CancellationToken);
 		}
 	}

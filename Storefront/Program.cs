@@ -21,8 +21,8 @@ builder.Services.AddLogging();
 builder.AddServiceDefaults();
 WebApplication app = builder.Build();
 
-app.MapPost("/w", WriteMessage);
-app.MapGet("/g/{id}", GetUserMessages);
+app.MapPost("/write", WriteMessage);
+app.MapGet("/get/{id}", GetUserMessages);
 
 app.MapDefaultEndpoints();
 app.Run();

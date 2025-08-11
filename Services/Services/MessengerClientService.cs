@@ -21,7 +21,6 @@ public class MessengerClientService
 			RequestUserId = message.IssuerId,
 			ResponseUserId = message.ReceiverId,
 			TextMessage = message.TextMessage,
-			MessageId = message.MessageId
 		});
 
 		if (response is null || response.IsSuccessful is false)

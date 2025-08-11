@@ -21,9 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Protobuf Include="Protos\messengerServer.proto" GrpcServices="Both"/>
+        <Protobuf Include="..\messengerDataProvider.proto" GrpcServices="Server"/>
     </ItemGroup>
-
+    
     <ItemGroup>
         <Folder Include="Abstractions\Services\"/>
         <Folder Include="Migrations\"/>

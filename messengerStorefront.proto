@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Storefront"; //TODO: if does not work, change to Storefront
+option csharp_namespace = "Storefront";
 
 package messenger;
 
@@ -26,12 +26,12 @@ message GetMessageRequest {
 }
 message GetMessageResponse {
   string message = 1;
-  string messageId = 2;
+  int32 messageId = 2;
   int32 receiverId = 3;
 }
 
 message EditMessageRequest {
-  string messageId = 1;
+  int32 messageId = 1;
   string newMessage = 2;
 }
 message EditMessageResponse {
@@ -40,7 +40,7 @@ message EditMessageResponse {
 }
 
 message DeleteMessageRequest {
-  string messageId = 1;
+  int32 messageId = 1;
 }
 message DeleteMessageResponse {
   bool isSuccessful = 1;
